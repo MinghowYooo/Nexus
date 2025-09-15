@@ -1,0 +1,45 @@
+
+#### **3.2. Functional Requirements (MVP)**
+
+**Feature: Agentic Discovery**
+*   The agent must accept natural language text input from the user.
+*   The system will use an LLM API (e.g., GPT-4o) to interpret user intent.
+*   The agent will respond with a clarifying question or immediately begin populating the main feed with videos matching the query.
+*   The agent must maintain conversation context within a single session.
+
+**Feature: Intelligent Comments Hub**
+*   For any video, the creator can navigate to their dashboard and click a "Summarize Comments" button.
+*   The system will send all text comments for that video to an LLM API with a prompt to extract key themes, common questions, and overall sentiment.
+*   The output will be a concise, bulleted list displayed to the creator.
+
+**Feature: Video & Profile**
+*   Standard video upload functionality (supporting .mp4, up to 100MB).
+*   User account creation (email/password and Google OAuth).
+*   Ability to follow/unfollow creators.
+
+#### **3.3. Out of Scope for MVP**
+*   **NO** voice commands for the agent.
+*   **NO** proactive agent suggestions.
+*   **NO** live streaming.
+*   **NO** advanced creator monetization (tipping, subscriptions).
+*   **NO** direct messaging between users.
+
+---
+
+### **4. Success Metrics**
+
+| Metric Name | Type | Description & Goal |
+| :--- | :--- | :--- |
+| **Intent-Driven Session Success Rate** | **North Star** | % of sessions where a user's conversational query leads to them watching >80% of a suggested video. **Goal: >40%** |
+| **User Retention (D1/D7/D30)** | Primary | % of users returning after 1, 7, and 30 days. Validates core value. |
+| **Creator Activation Rate** | Primary | % of creators who use the "Summarize Comments" feature within 7 days of posting a video. **Goal: >60%** |
+| **Avg. Watch Time per User** | Counter | Ensures we are not only serving searchers but also retaining engagement for passive viewing. We want this to be stable or increasing. |
+
+---
+
+### **5. Future Considerations (Post-MVP)**
+
+*   **V1.1:** Introduce voice interaction with the agent for a hands-free experience.
+*   **V1.2:** Develop proactive suggestions, where the agent suggests new learning paths based on viewing history.
+*   **V2.0:** Expand the creator co-pilot to include drafting replies and identifying "superfans."
+*   **V2.1:** Introduce creator monetization tools, leveraging the agent to facilitate connections between creators and their most engaged fans.
