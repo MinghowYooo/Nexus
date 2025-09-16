@@ -10,13 +10,9 @@ server {
         try_files $uri /index.html;
     }
 
-    # API reverse proxy to backend Cloud Run URL (only if BACKEND_URL is set)
+    # API reverse proxy to backend Cloud Run URL
     location /api/ {
-        # If BACKEND_URL is not set, return 404 (for local dev)
-        if ($http_host ~ "localhost") {
-            return 404;
-        }
-        proxy_pass ${BACKEND_URL};
+        #BACKEND_PROXY#
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
