@@ -1,0 +1,118 @@
+// Sample video data for when database is not available
+export const sampleVideos = [
+  {
+    id: 'dQw4w9WgXcQ',
+    title: 'Rick Astley - Never Gonna Give You Up (Official Video)',
+    channel_name: 'Rick Astley',
+    channel_id: 'UCuAXFkgsw1L7xaCfnd5JJOw',
+    description: 'The official video for "Never Gonna Give You Up" by Rick Astley',
+    thumbnail_url: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+    view_count: 1234567890,
+    like_count: 15000000,
+    comment_count: 2000000,
+    video_tags: ['music', 'pop', '80s', 'rickroll'],
+    category: 'Music',
+    publish_date: '2009-10-25T06:57:33Z',
+    daily_rank: 1,
+    daily_movement: 0,
+    weekly_movement: 0,
+    country: 'US',
+    language: 'en',
+    created_at: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: 'jNQXAC9IVRw',
+    title: 'Me at the zoo',
+    channel_name: 'jawed',
+    channel_id: 'UC4QobU6STFB0P71PMvJK_Ng',
+    description: 'The first video ever uploaded to YouTube',
+    thumbnail_url: 'https://i.ytimg.com/vi/jNQXAC9IVRw/maxresdefault.jpg',
+    view_count: 250000000,
+    like_count: 5000000,
+    comment_count: 1000000,
+    video_tags: ['zoo', 'elephant', 'first video', 'youtube'],
+    category: 'People & Blogs',
+    publish_date: '2005-04-23T20:33:48Z',
+    daily_rank: 2,
+    daily_movement: 0,
+    weekly_movement: 0,
+    country: 'US',
+    language: 'en',
+    created_at: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: 'kJQP7kiw5Fk',
+    title: 'Luis Fonsi - Despacito ft. Daddy Yankee',
+    channel_name: 'Luis Fonsi',
+    channel_id: 'UCvCwDdX4NQy5Luj0BcGEMaQ',
+    description: 'Luis Fonsi Despacito ft. Daddy Yankee',
+    thumbnail_url: 'https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg',
+    view_count: 8000000000,
+    like_count: 50000000,
+    comment_count: 8000000,
+    video_tags: ['despacito', 'luis fonsi', 'daddy yankee', 'reggaeton'],
+    category: 'Music',
+    publish_date: '2017-01-12T23:00:00Z',
+    daily_rank: 3,
+    daily_movement: 0,
+    weekly_movement: 0,
+    country: 'US',
+    language: 'es',
+    created_at: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: 'YQHsXMglC9A',
+    title: 'Adele - Hello',
+    channel_name: 'AdeleVEVO',
+    channel_id: 'UComPKehI6Q8c8UFH6s-7P9w',
+    description: 'Adele - Hello (Official Music Video)',
+    thumbnail_url: 'https://i.ytimg.com/vi/YQHsXMglC9A/maxresdefault.jpg',
+    view_count: 3500000000,
+    like_count: 25000000,
+    comment_count: 3000000,
+    video_tags: ['adele', 'hello', 'music', 'ballad'],
+    category: 'Music',
+    publish_date: '2015-10-22T23:00:00Z',
+    daily_rank: 4,
+    daily_movement: 0,
+    weekly_movement: 0,
+    country: 'US',
+    language: 'en',
+    created_at: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: '9bZkp7q19f0',
+    title: 'PSY - GANGNAM STYLE (강남스타일) M/V',
+    channel_name: 'officialpsy',
+    channel_id: 'UCrDkAvwZum-UTjHmzDI2iIw',
+    description: 'PSY - GANGNAM STYLE (강남스타일) M/V',
+    thumbnail_url: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
+    view_count: 4500000000,
+    like_count: 30000000,
+    comment_count: 5000000,
+    video_tags: ['psy', 'gangnam style', 'k-pop', 'dance'],
+    category: 'Music',
+    publish_date: '2012-07-15T07:00:00Z',
+    daily_rank: 5,
+    daily_movement: 0,
+    weekly_movement: 0,
+    country: 'KR',
+    language: 'ko',
+    created_at: '2024-01-01T00:00:00Z'
+  }
+];
+
+export const sampleCategories = [
+  { category: 'Music', count: 3 },
+  { category: 'People & Blogs', count: 1 },
+  { category: 'Entertainment', count: 1 }
+];
+
+export const sampleStats = {
+  total_videos: 5,
+  total_channels: 4,
+  total_categories: 2,
+  avg_views: 3000000000,
+  max_views: 8000000000,
+  min_views: 250000000
+};

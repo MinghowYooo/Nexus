@@ -1,5 +1,6 @@
 import express from 'express';
 import { query } from '../config/database.js';
+import { sampleVideos, sampleCategories, sampleStats } from '../data/sampleVideos.js';
 
 const router = express.Router();
 
@@ -18,63 +19,110 @@ router.get('/', async (req, res) => {
     const offset = (parseInt(page) - 1) * parseInt(limit);
     const limitNum = Math.min(parseInt(limit), 100); // Max 100 per page
 
-    // Build WHERE clause
-    let whereClause = 'WHERE 1=1';
-    const params = [];
-    let paramCount = 0;
+    // Try database first, fallback to sample data
+    try {
+      // Build WHERE clause
+      let whereClause = 'WHERE 1=1';
+      const params = [];
+      let paramCount = 0;
 
-    if (category) {
-      paramCount++;
-      whereClause += ` AND category = $${paramCount}`;
-      params.push(category);
-    }
-
-    if (channel) {
-      paramCount++;
-      whereClause += ` AND channel_name ILIKE $${paramCount}`;
-      params.push(`%${channel}%`);
-    }
-
-    // Validate sort column
-    const allowedSorts = ['view_count', 'like_count', 'comment_count', 'publish_date', 'daily_rank'];
-    const sortColumn = allowedSorts.includes(sort) ? sort : 'view_count';
-    const sortOrder = order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
-
-    // Get videos
-    const videosQuery = `
-      SELECT 
-        id, title, channel_name, channel_id, description, thumbnail_url,
-        view_count, like_count, comment_count, video_tags, category,
-        publish_date, daily_rank, daily_movement, weekly_movement,
-        country, language, created_at
-      FROM videos 
-      ${whereClause}
-      ORDER BY ${sortColumn} ${sortOrder}
-      LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
-    `;
-
-    params.push(limitNum, offset);
-
-    const videosResult = await query(videosQuery, params);
-
-    // Get total count for pagination
-    const countQuery = `SELECT COUNT(*) as total FROM videos ${whereClause}`;
-    const countResult = await query(countQuery, params.slice(0, -2)); // Remove limit and offset params
-
-    const total = parseInt(countResult.rows[0].total);
-    const totalPages = Math.ceil(total / limitNum);
-
-    res.json({
-      videos: videosResult.rows,
-      pagination: {
-        page: parseInt(page),
-        limit: limitNum,
-        total,
-        totalPages,
-        hasNext: parseInt(page) < totalPages,
-        hasPrev: parseInt(page) > 1
+      if (category) {
+        paramCount++;
+        whereClause += ` AND category = $${paramCount}`;
+        params.push(category);
       }
-    });
+
+      if (channel) {
+        paramCount++;
+        whereClause += ` AND channel_name ILIKE $${paramCount}`;
+        params.push(`%${channel}%`);
+      }
+
+      // Validate sort column
+      const allowedSorts = ['view_count', 'like_count', 'comment_count', 'publish_date', 'daily_rank'];
+      const sortColumn = allowedSorts.includes(sort) ? sort : 'view_count';
+      const sortOrder = order.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+      // Get videos
+      const videosQuery = `
+        SELECT 
+          id, title, channel_name, channel_id, description, thumbnail_url,
+          view_count, like_count, comment_count, video_tags, category,
+          publish_date, daily_rank, daily_movement, weekly_movement,
+          country, language, created_at
+        FROM videos 
+        ${whereClause}
+        ORDER BY ${sortColumn} ${sortOrder}
+        LIMIT $${paramCount + 1} OFFSET $${paramCount + 2}
+      `;
+
+      params.push(limitNum, offset);
+
+      const videosResult = await query(videosQuery, params);
+
+      // Get total count for pagination
+      const countQuery = `SELECT COUNT(*) as total FROM videos ${whereClause}`;
+      const countResult = await query(countQuery, params.slice(0, -2)); // Remove limit and offset params
+
+      const total = parseInt(countResult.rows[0].total);
+      const totalPages = Math.ceil(total / limitNum);
+
+      res.json({
+        videos: videosResult.rows,
+        pagination: {
+          page: parseInt(page),
+          limit: limitNum,
+          total,
+          totalPages,
+          hasNext: parseInt(page) < totalPages,
+          hasPrev: parseInt(page) > 1
+        }
+      });
+
+    } catch (dbError) {
+      console.log('Database not available, using sample data:', dbError.message);
+      
+      // Use sample data
+      let filteredVideos = [...sampleVideos];
+      
+      // Apply filters
+      if (category) {
+        filteredVideos = filteredVideos.filter(video => video.category === category);
+      }
+      
+      if (channel) {
+        filteredVideos = filteredVideos.filter(video => 
+          video.channel_name.toLowerCase().includes(channel.toLowerCase())
+        );
+      }
+      
+      // Apply sorting
+      const sortColumn = sort || 'view_count';
+      const sortOrder = order === 'asc' ? 1 : -1;
+      
+      filteredVideos.sort((a, b) => {
+        const aVal = a[sortColumn] || 0;
+        const bVal = b[sortColumn] || 0;
+        return (aVal > bVal ? 1 : -1) * sortOrder;
+      });
+      
+      // Apply pagination
+      const total = filteredVideos.length;
+      const totalPages = Math.ceil(total / limitNum);
+      const paginatedVideos = filteredVideos.slice(offset, offset + limitNum);
+      
+      res.json({
+        videos: paginatedVideos,
+        pagination: {
+          page: parseInt(page),
+          limit: limitNum,
+          total,
+          totalPages,
+          hasNext: parseInt(page) < totalPages,
+          hasPrev: parseInt(page) > 1
+        }
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching videos:', error);
@@ -82,8 +130,8 @@ router.get('/', async (req, res) => {
     res.json({
       videos: [],
       pagination: {
-        page: parseInt(page),
-        limit: limitNum,
+        page: parseInt(page) || 1,
+        limit: parseInt(limit) || 20,
         total: 0,
         totalPages: 0,
         hasNext: false,
@@ -99,24 +147,37 @@ router.get('/trending', async (req, res) => {
     const { limit = 20 } = req.query;
     const limitNum = Math.min(parseInt(limit), 100);
 
-    const queryText = `
-      SELECT 
-        id, title, channel_name, channel_id, description, thumbnail_url,
-        view_count, like_count, comment_count, video_tags, category,
-        publish_date, daily_rank, daily_movement, weekly_movement,
-        country, language, created_at
-      FROM videos 
-      WHERE daily_rank IS NOT NULL
-      ORDER BY daily_rank ASC, view_count DESC
-      LIMIT $1
-    `;
+    try {
+      const queryText = `
+        SELECT 
+          id, title, channel_name, channel_id, description, thumbnail_url,
+          view_count, like_count, comment_count, video_tags, category,
+          publish_date, daily_rank, daily_movement, weekly_movement,
+          country, language, created_at
+        FROM videos 
+        WHERE daily_rank IS NOT NULL
+        ORDER BY daily_rank ASC, view_count DESC
+        LIMIT $1
+      `;
 
-    const result = await query(queryText, [limitNum]);
+      const result = await query(queryText, [limitNum]);
 
-    res.json({
-      videos: result.rows,
-      count: result.rows.length
-    });
+      res.json({
+        videos: result.rows,
+        count: result.rows.length
+      });
+    } catch (dbError) {
+      console.log('Database not available, using sample data for trending');
+      const trendingVideos = sampleVideos
+        .filter(video => video.daily_rank)
+        .sort((a, b) => a.daily_rank - b.daily_rank)
+        .slice(0, limitNum);
+      
+      res.json({
+        videos: trendingVideos,
+        count: trendingVideos.length
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching trending videos:', error);
@@ -242,19 +303,26 @@ router.get('/:id', async (req, res) => {
 // GET /api/videos/categories - Get available categories
 router.get('/meta/categories', async (req, res) => {
   try {
-    const queryText = `
-      SELECT category, COUNT(*) as count
-      FROM videos 
-      WHERE category IS NOT NULL
-      GROUP BY category
-      ORDER BY count DESC
-    `;
+    try {
+      const queryText = `
+        SELECT category, COUNT(*) as count
+        FROM videos 
+        WHERE category IS NOT NULL
+        GROUP BY category
+        ORDER BY count DESC
+      `;
 
-    const result = await query(queryText);
+      const result = await query(queryText);
 
-    res.json({
-      categories: result.rows
-    });
+      res.json({
+        categories: result.rows
+      });
+    } catch (dbError) {
+      console.log('Database not available, using sample data for categories');
+      res.json({
+        categories: sampleCategories
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -265,22 +333,29 @@ router.get('/meta/categories', async (req, res) => {
 // GET /api/videos/meta/stats - Get video statistics
 router.get('/meta/stats', async (req, res) => {
   try {
-    const statsQuery = `
-      SELECT 
-        COUNT(*) as total_videos,
-        COUNT(DISTINCT channel_name) as total_channels,
-        COUNT(DISTINCT category) as total_categories,
-        AVG(view_count) as avg_views,
-        MAX(view_count) as max_views,
-        MIN(view_count) as min_views
-      FROM videos
-    `;
+    try {
+      const statsQuery = `
+        SELECT 
+          COUNT(*) as total_videos,
+          COUNT(DISTINCT channel_name) as total_channels,
+          COUNT(DISTINCT category) as total_categories,
+          AVG(view_count) as avg_views,
+          MAX(view_count) as max_views,
+          MIN(view_count) as min_views
+        FROM videos
+      `;
 
-    const result = await query(statsQuery);
+      const result = await query(statsQuery);
 
-    res.json({
-      stats: result.rows[0]
-    });
+      res.json({
+        stats: result.rows[0]
+      });
+    } catch (dbError) {
+      console.log('Database not available, using sample data for stats');
+      res.json({
+        stats: sampleStats
+      });
+    }
 
   } catch (error) {
     console.error('Error fetching stats:', error);
