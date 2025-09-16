@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { videoDatabaseService } from '../services/videoDatabase.js';
+import { apiService } from '../services/apiService.js';
 
 /**
  * Custom hook for video search functionality
@@ -14,11 +14,11 @@ export const useVideoSearch = () => {
     setError(null);
 
     try {
-      // Use local video database
-      const results = await videoDatabaseService.searchVideos(query);
-      return results;
-    } catch (dbError) {
-      console.error('Video database search failed:', dbError);
+      // Use API service for search
+      const response = await apiService.searchVideos(query, { limit: 20 });
+      return response.videos || [];
+    } catch (apiError) {
+      console.error('API search failed:', apiError);
       setError('Search failed - please try again');
       return [];
     } finally {

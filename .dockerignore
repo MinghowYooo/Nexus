@@ -1,0 +1,25 @@
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.git
+.gitignore
+.vscode
+.DS_Store
+dist
+.cache
+.parcel-cache
+.next
+.nuxt
+coverage
+
+# Big local datasets
+public/*.csv
+
+# Backend
+backend/node_modules
+backend/.env
+backend/database.env
+
+
+

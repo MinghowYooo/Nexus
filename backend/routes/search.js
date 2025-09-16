@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
 
   } catch (error) {
     console.error('Error searching videos:', error);
-    res.status(500).json({ error: 'Failed to search videos' });
+    res.json({ videos: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0, hasNext: false, hasPrev: false } });
   }
 });
 

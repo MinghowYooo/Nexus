@@ -7,7 +7,12 @@ const VideoCard = ({ video, onCommentClick, onShareClick, onLikeClick, onDislike
   const iframeRef = useRef(null);
   const videoContainerRef = useRef(null);
   
-  if (!video) {
+  if (!video || !video.id) {
+    return null;
+  }
+  
+  // Don't render if video ID is invalid (not 11 characters)
+  if (video.id.length !== 11 || !/^[a-zA-Z0-9_-]{11}$/.test(video.id)) {
     return null;
   }
   
@@ -17,7 +22,7 @@ const VideoCard = ({ video, onCommentClick, onShareClick, onLikeClick, onDislike
   
   const highQualityThumbnail = getHighQualityThumbnail(video.id || '', video.thumbnail || '');
   const thumbnailSrcSet = getThumbnailSrcSet(video.id || '');
-  const embedUrl = `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&cc_load_policy=0&start=0&end=&vq=hd720`;
+  const embedUrl = video.src || `https://www.youtube.com/embed/${video.id}?autoplay=1&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&cc_load_policy=0&start=0&end=&vq=hd720`;
 
   const ActionButton = ({ icon: Icon, value, onClick = () => {}, active = false }) => (
     <div onClick={(e) => { e.stopPropagation(); onClick(e); }} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer">

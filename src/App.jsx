@@ -24,25 +24,45 @@ export default function App() {
   const toastTimeoutRef = useRef(null);
   const { searchVideos, isLoading: searchLoading, error: searchError } = useVideoSearch();
 
-  const transformVideoData = (apiVideo) => {
+  const transformVideoData = (apiVideo, index = 0) => {
+    // Handle both database format and CSV format
+    const videoId = apiVideo.video_id || apiVideo.id;
+    const title = apiVideo.title;
+    const channelName = apiVideo.channelTitle || apiVideo.channel_name;
+    const thumbnail = apiVideo.thumbnail_link || apiVideo.thumbnail_url;
+    const viewCount = apiVideo.view_count;
+    const likeCount = apiVideo.likes || apiVideo.like_count;
+    const commentCount = apiVideo.comment_count;
+    const description = apiVideo.description;
+    const tags = apiVideo.tags ? apiVideo.tags.split('|') : (apiVideo.video_tags || []);
+    const category = apiVideo.categoryId || apiVideo.category;
+    const publishDate = apiVideo.publishedAt || apiVideo.publish_date;
+    
+    // Validate video ID (YouTube IDs are typically 11 characters)
+    const isValidVideoId = videoId && videoId.length === 11 && /^[a-zA-Z0-9_-]{11}$/.test(videoId);
+    
+    // Create a unique key that combines video ID with index to handle duplicates
+    const uniqueKey = `${videoId}_${index}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     return {
-      id: apiVideo.id,
-      title: apiVideo.title,
-      caption: apiVideo.title,
-      creator: apiVideo.channel_name,
-      channel: apiVideo.channel_name,
-      thumbnail: apiVideo.thumbnail_url,
-      views: parseInt(apiVideo.view_count) || 0,
-      likes: parseInt(apiVideo.like_count) || 0,
-      comments: parseInt(apiVideo.comment_count) || 0,
-      description: apiVideo.description,
-      tags: apiVideo.video_tags || [],
-      category: apiVideo.category,
-      publishDate: apiVideo.publish_date,
-      age: apiVideo.publish_date ? new Date(apiVideo.publish_date).toLocaleDateString() : 'Unknown',
-      avatar: null,
-      src: null,
-      duration: null,
+      id: videoId,
+      key: uniqueKey, // Add unique key for React
+      title: title,
+      caption: title,
+      creator: channelName,
+      channel: channelName,
+      thumbnail: thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+      views: parseInt(viewCount) || 0,
+      likes: parseInt(likeCount) || 0,
+      comments: parseInt(commentCount) || 0,
+      description: description,
+      tags: tags,
+      category: category,
+      publishDate: publishDate,
+      age: publishDate ? new Date(publishDate).toLocaleDateString() : 'Unknown',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(channelName || 'Unknown')}&background=random`,
+      src: isValidVideoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&modestbranding=1&rel=0` : null,
+      duration: `${Math.floor(Math.random() * 20) + 1}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
       type: 'video'
     };
   };
@@ -51,7 +71,7 @@ export default function App() {
     const loadInitialVideos = async () => {
       try {
         const response = await apiService.getAllVideos({ page: 1, limit: 20 });
-        const transformedVideos = (response.videos || []).map(transformVideoData);
+        const transformedVideos = (response.videos || []).map((video, index) => transformVideoData(video, index));
         const uniqueVideos = transformedVideos.filter((video, index, self) => 
           index === self.findIndex(v => v.id === video.id)
         );
@@ -71,7 +91,7 @@ export default function App() {
           const data = await response.json();
           
           if (data.videos && data.videos.length > 0) {
-            const transformedVideos = data.videos.map(transformVideoData);
+            const transformedVideos = data.videos.map((video, index) => transformVideoData(video, index));
             const uniqueVideos = transformedVideos.filter((video, index, self) => 
               index === self.findIndex(v => v.id === video.id)
             );
@@ -90,7 +110,7 @@ export default function App() {
             
             if (csvResponse.ok) {
               const csvData = await csvResponse.json();
-              const transformedVideos = csvData.videos.map(transformVideoData);
+              const transformedVideos = csvData.videos.map((video, index) => transformVideoData(video, index));
               setVideoGrid(transformedVideos);
               setCurrentPage(1);
               setHasMoreVideos(csvData.pagination?.hasNext || false);
@@ -125,7 +145,7 @@ export default function App() {
       const response = await apiService.getAllVideos({ page: nextPage, limit: 20 });
       
       if (response.videos && response.videos.length > 0) {
-        const transformedVideos = response.videos.map(transformVideoData);
+        const transformedVideos = response.videos.map((video, index) => transformVideoData(video, index));
         setVideoGrid(prev => {
           const existingIds = new Set(prev.map(video => video.id));
           const newVideos = transformedVideos.filter(video => !existingIds.has(video.id));
@@ -147,7 +167,8 @@ export default function App() {
   const handleNewFeed = async (query) => {
     try {
       const results = await searchVideos(query);
-      setVideoGrid(results.length > 0 ? results : []);
+      const transformedVideos = results.map((video, index) => transformVideoData(video, index));
+      setVideoGrid(transformedVideos.length > 0 ? transformedVideos : []);
       setCurrentPage(1);
       setHasMoreVideos(false);
     } catch (error) {
@@ -213,7 +234,7 @@ export default function App() {
   const handleRefreshFeed = async () => {
       try {
         const response = await apiService.getAllVideos({ page: 1, limit: 20 });
-        const transformedVideos = (response.videos || []).map(transformVideoData);
+        const transformedVideos = (response.videos || []).map((video, index) => transformVideoData(video, index));
         const uniqueVideos = transformedVideos.filter((video, index, self) => 
           index === self.findIndex(v => v.id === video.id)
         );
@@ -234,7 +255,7 @@ export default function App() {
           const data = await response.json();
         
           if (data.videos && data.videos.length > 0) {
-            const transformedVideos = data.videos.map(transformVideoData);
+            const transformedVideos = data.videos.map((video, index) => transformVideoData(video, index));
             const uniqueVideos = transformedVideos.filter((video, index, self) => 
               index === self.findIndex(v => v.id === video.id)
             );
@@ -253,7 +274,7 @@ export default function App() {
             
             if (csvResponse.ok) {
               const csvData = await csvResponse.json();
-              const transformedVideos = csvData.videos.map(transformVideoData);
+              const transformedVideos = csvData.videos.map((video, index) => transformVideoData(video, index));
               setVideoGrid(transformedVideos);
               setCurrentPage(1);
               setHasMoreVideos(csvData.pagination?.hasNext || false);

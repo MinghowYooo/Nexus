@@ -78,7 +78,18 @@ router.get('/', async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching videos:', error);
-    res.status(500).json({ error: 'Failed to fetch videos' });
+    // Return empty result instead of 500 error to prevent crashes
+    res.json({
+      videos: [],
+      pagination: {
+        page: parseInt(page),
+        limit: limitNum,
+        total: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false
+      }
+    });
   }
 });
 
@@ -109,7 +120,7 @@ router.get('/trending', async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching trending videos:', error);
-    res.status(500).json({ error: 'Failed to fetch trending videos' });
+    res.json({ videos: [], count: 0 });
   }
 });
 
@@ -165,7 +176,7 @@ router.get('/diverse', async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching diverse videos:', error);
-    res.status(500).json({ error: 'Failed to fetch diverse videos' });
+    res.json({ videos: [], count: 0 });
   }
 });
 

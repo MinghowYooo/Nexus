@@ -367,7 +367,7 @@ const VideoGridPanel = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {myLikedVideos.map((video, index) => (
                 <VideoCard 
-                  key={video.key || video.id || `liked-video-${index}`} 
+                  key={video.key || `liked-video-${index}`} 
                   video={video} 
                   onCommentClick={onCommentClick}
                   onShareClick={onShareClick}
@@ -425,7 +425,7 @@ const VideoGridPanel = ({
             {filteredVideos.length > 0 ? (
               filteredVideos.map((video, index) => (
                 <VideoCard 
-                  key={video.key || video.id || `video-${index}`} 
+                  key={video.key || `video-${index}`} 
                   video={video} 
                   onCommentClick={onCommentClick}
                   onShareClick={onShareClick}
