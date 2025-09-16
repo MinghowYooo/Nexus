@@ -11,5 +11,8 @@ else
     sed "s|#BACKEND_PROXY#|return 404;|g" /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
 fi
 
+# Test nginx config
+nginx -t
+
 # Start nginx
 nginx -g "daemon off;"
