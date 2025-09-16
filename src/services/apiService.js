@@ -5,7 +5,23 @@
 
 import { getHighQualityThumbnail } from '../utils/thumbnailUtils.js';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Smart API base URL detection
+const getApiBaseUrl = () => {
+  // If VITE_API_BASE_URL is set, use it (for Cloud Run or custom config)
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // For local development, use localhost backend
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3001';
+  }
+  
+  // For production (Cloud Run), use relative URLs (Nginx proxy)
+  return '';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiService {
   constructor() {
